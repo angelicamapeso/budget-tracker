@@ -35,4 +35,10 @@ function createBudgetIDB() {
   }
 }
 
+function saveRecord(transactionData) {
+  const transaction = db.transaction(["transactions"], "readwrite");
+  const store = transaction.objectStore("transactions");
+  store.add(transactionData);
+}
+
 createBudgetIDB();
