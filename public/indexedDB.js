@@ -17,6 +17,10 @@ function createBudgetIDB() {
     // set result to db global variable
     request.onsuccess = function (event) {
       db = request.result;
+
+      if (navigator.onLine) {
+        postIndexedTransactions();
+      }
     };
 
     // when upgraded, create 'transactions' store
@@ -41,4 +45,28 @@ function saveRecord(transactionData) {
   store.add(transactionData);
 }
 
+function postIndexedTransactions() {
+  const transaction = db.transaction(["transactions"], "readwrite");
+  const store = transaction.objectStore("transactions");
+  const getAll = store.getAll();
+  getAll.onsuccess = function () {
+    if (getAll.result.length > 0) {
+      fetch("/api/transaction/bulk", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(getAll.result),
+      })
+        .then(response => response.json())
+        .then(() => {
+          const transaction = db.transaction(["transactions"], "readwrite");
+          const store = transaction.objectStore("transactions");
+          store.clear();
+        });
+    }
+  };
+}
+
 createBudgetIDB();
+window.addEventListener("online", postIndexedTransactions);
