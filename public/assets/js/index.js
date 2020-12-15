@@ -20,11 +20,11 @@ window.addEventListener("load", function () {
             transactionData.forEach(result => {
               transactions.unshift(result);
             });
-
-            populateTotal();
-            populateTable();
-            populateChart();
           }
+
+          populateTotal();
+          populateTable();
+          populateChart();
         });
       } else {
         postIndexedTransactions();
