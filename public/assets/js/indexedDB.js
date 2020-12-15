@@ -1,89 +1,97 @@
-let db;
-
 // set up the indexedDB 'budget' database
-function createBudgetIDB() {
-  if ("indexedDB" in window) {
-    const request = indexedDB.open("budget", 1);
+function getBudgetIDBConnection() {
+  return new Promise((resolve, reject) => {
+    let db;
+    if ("indexedDB" in window) {
+      const request = indexedDB.open("budget", 1);
 
-    // handles any errors when opening indexedDB database
-    request.onerror = function (event) {
-      console.log(
-        "[Indexed DB] Error with open database request: ",
-        request.error
-      );
-    };
-
-    // indexedDB successfully opened
-    // set result to db global variable
-    request.onsuccess = function (event) {
-      db = request.result;
-
-      if (navigator.onLine) {
-        postIndexedTransactions();
-      }
-    };
-
-    // when upgraded, create 'transactions' store
-    request.onupgradeneeded = function (event) {
-      const db = request.result;
-      db.onerror = function (event) {
-        console.log(`[Indexed DB] Error with database: ${db.name}`, db.error);
+      // handles any errors when opening indexedDB database
+      request.onerror = function (event) {
+        console.log(
+          "[Indexed DB] Error with open database request: ",
+          request.error
+        );
       };
 
-      db.createObjectStore("transactions", {
-        autoIncrement: true,
-      });
-    };
-  } else {
-    console.log("IndexedDB is not supported by this browser.");
-  }
-}
+      // indexedDB successfully opened
+      // set result to db global variable
+      request.onsuccess = function (event) {
+        db = request.result;
+        resolve(db);
+      };
 
-function saveRecord(transactionData) {
-  const transaction = db.transaction(["transactions"], "readwrite");
-  const store = transaction.objectStore("transactions");
-  store.add(transactionData);
-}
+      // when upgraded, create 'transactions' store
+      request.onupgradeneeded = function (event) {
+        const db = request.result;
+        db.onerror = function (event) {
+          console.log(`[Indexed DB] Error with database: ${db.name}`, db.error);
+        };
 
-function getRecords(transactionArray) {
-  const transaction = db.transaction(["transactions"], "readonly");
-  const store = transaction.objectStore("transactions");
-  const getAll = store.getAll();
-  getAll.onsuccess = function () {
-    if (getAll.result.length > 0) {
-      getAll.result.forEach(result => {
-        transactionArray.unshift(result);
-      });
-
-      populateTotal();
-      populateTable();
-      populateChart();
+        db.createObjectStore("transactions", {
+          autoIncrement: true,
+        });
+      };
+    } else {
+      console.log("IndexedDB is not supported by this browser.");
+      resolve(db);
     }
-  };
+  });
+}
+
+function indexTransaction(transactionData) {
+  return new Promise((resolve, reject) => {
+    getBudgetIDBConnection().then(db => {
+      if (db) {
+        const transaction = db.transaction(["transactions"], "readwrite");
+        const store = transaction.objectStore("transactions");
+        store.add(transactionData);
+        resolve(transactionData);
+      } else {
+        resolve(db);
+      }
+    });
+  });
+}
+
+function getIndexedTransactions() {
+  return new Promise((resolve, reject) => {
+    getBudgetIDBConnection().then(db => {
+      if (db) {
+        const transaction = db.transaction(["transactions"], "readonly");
+        const store = transaction.objectStore("transactions");
+        const getAll = store.getAll();
+        getAll.onsuccess = function () {
+          resolve(getAll.result);
+        };
+      } else {
+        resolve(db);
+      }
+    });
+  });
 }
 
 function postIndexedTransactions() {
-  const transaction = db.transaction(["transactions"], "readwrite");
-  const store = transaction.objectStore("transactions");
-  const getAll = store.getAll();
-  getAll.onsuccess = function () {
-    if (getAll.result.length > 0) {
+  getIndexedTransactions().then(transactions => {
+    if (transactions.length > 0) {
       fetch("/api/transaction/bulk", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(getAll.result),
+        body: JSON.stringify(transactions),
       })
         .then(response => response.json())
         .then(() => {
-          const transaction = db.transaction(["transactions"], "readwrite");
-          const store = transaction.objectStore("transactions");
-          store.clear();
+          getBudgetIDBConnection().then(db => {
+            if (db) {
+              const transaction = db.transaction(["transactions"], "readwrite");
+              const store = transaction.objectStore("transactions");
+              store.clear();
+            }
+          });
         });
     }
-  };
+  });
 }
 
-createBudgetIDB();
 window.addEventListener("online", postIndexedTransactions);

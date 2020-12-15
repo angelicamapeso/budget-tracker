@@ -15,9 +15,19 @@ window.addEventListener("load", function () {
       transactions = data;
 
       if (!navigator.onLine) {
-        getRecords(transactions);
-        console.log(transactions);
+        getIndexedTransactions().then(transactionData => {
+          if (transactionData.length > 0) {
+            transactionData.forEach(result => {
+              transactions.unshift(result);
+            });
+
+            populateTotal();
+            populateTable();
+            populateChart();
+          }
+        });
       } else {
+        postIndexedTransactions();
         populateTotal();
         populateTable();
         populateChart();
@@ -147,7 +157,7 @@ function sendTransaction(isAdding) {
     })
     .catch(err => {
       // fetch failed, so save in indexed db
-      saveRecord(transaction);
+      indexTransaction(transaction);
 
       // clear form
       nameEl.value = "";
