@@ -4,6 +4,7 @@ import {
   postIndexedTransactions,
 } from "./indexedDB.js";
 import { getTransactions, postTransaction } from "./api.js";
+import { populateTotal } from "./populate.js";
 
 let transactions = [];
 let myChart;
@@ -27,28 +28,18 @@ window.addEventListener("load", function () {
           });
         }
 
-        populateTotal();
+        populateTotal(transactions);
         populateTable();
         populateChart();
       });
     } else {
       postIndexedTransactions();
-      populateTotal();
+      populateTotal(transactions);
       populateTable();
       populateChart();
     }
   });
 });
-
-function populateTotal() {
-  // reduce transaction amounts to a single total value
-  let total = transactions.reduce((total, t) => {
-    return total + parseInt(t.value);
-  }, 0);
-
-  let totalEl = document.querySelector("#total");
-  totalEl.textContent = total;
-}
 
 function populateTable() {
   let tbody = document.querySelector("#tbody");
@@ -137,7 +128,7 @@ function sendTransaction(isAdding) {
   // re-run logic to populate ui with new record
   populateChart();
   populateTable();
-  populateTotal();
+  populateTotal(transactions);
 
   // also send to server
   postTransaction(transaction)
