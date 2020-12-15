@@ -70,6 +70,16 @@ function getIndexedTransactions() {
   });
 }
 
+function clearIndexedTransactions() {
+  getBudgetIDBConnection().then(db => {
+    if (db) {
+      const transaction = db.transaction(["transactions"], "readwrite");
+      const store = transaction.objectStore("transactions");
+      store.clear();
+    }
+  });
+}
+
 function postIndexedTransactions() {
   getIndexedTransactions().then(transactions => {
     if (transactions.length > 0) {
@@ -82,13 +92,7 @@ function postIndexedTransactions() {
       })
         .then(response => response.json())
         .then(() => {
-          getBudgetIDBConnection().then(db => {
-            if (db) {
-              const transaction = db.transaction(["transactions"], "readwrite");
-              const store = transaction.objectStore("transactions");
-              store.clear();
-            }
-          });
+          clearIndexedTransactions();
         });
     }
   });
