@@ -2,11 +2,11 @@ const STATIC_CACHE = "static-cache-v1";
 const DATA_CACHE = "data-cache-v1";
 const FILES_TO_CACHE = [
   "/",
-  "/index.js",
-  "/indexedDB.js",
-  "/styles.css",
-  "/icons/icon-192x192.png",
-  "/icons/icon-512x512.png",
+  "/assets/js/index.js",
+  "/assets/js/indexedDB.js",
+  "/assets/css/styles.css",
+  "/assets/images/icons/icon-192x192.png",
+  "/assets/images/icons/icon-512x512.png",
 ];
 
 // install service worker:
