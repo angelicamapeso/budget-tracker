@@ -1,3 +1,5 @@
+import { getTransactions, postTransaction } from "./api.js";
+
 let transactions = [];
 let myChart;
 
@@ -6,33 +8,29 @@ window.addEventListener("load", function () {
     navigator.serviceWorker.register("/service-worker.js");
   }
 
-  fetch("/api/transaction")
-    .then(response => {
-      return response.json();
-    })
-    .then(data => {
-      // save db data on global variable
-      transactions = data;
+  getTransactions().then(data => {
+    // save db data on global variable
+    transactions = data;
 
-      if (!navigator.onLine) {
-        getIndexedTransactions().then(transactionData => {
-          if (transactionData.length > 0) {
-            transactionData.forEach(result => {
-              transactions.unshift(result);
-            });
-          }
+    if (!navigator.onLine) {
+      getIndexedTransactions().then(transactionData => {
+        if (transactionData.length > 0) {
+          transactionData.forEach(result => {
+            transactions.unshift(result);
+          });
+        }
 
-          populateTotal();
-          populateTable();
-          populateChart();
-        });
-      } else {
-        postIndexedTransactions();
         populateTotal();
         populateTable();
         populateChart();
-      }
-    });
+      });
+    } else {
+      postIndexedTransactions();
+      populateTotal();
+      populateTable();
+      populateChart();
+    }
+  });
 });
 
 function populateTotal() {
@@ -135,17 +133,7 @@ function sendTransaction(isAdding) {
   populateTotal();
 
   // also send to server
-  fetch("/api/transaction", {
-    method: "POST",
-    body: JSON.stringify(transaction),
-    headers: {
-      Accept: "application/json, text/plain, */*",
-      "Content-Type": "application/json",
-    },
-  })
-    .then(response => {
-      return response.json();
-    })
+  postTransaction(transaction)
     .then(data => {
       if (data.errors) {
         errorEl.textContent = "Missing Information";

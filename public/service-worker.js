@@ -2,7 +2,7 @@ const STATIC_CACHE = "static-cache-v1";
 const DATA_CACHE = "data-cache-v1";
 const FILES_TO_CACHE = [
   "/",
-  "/assets/js/index.js",
+  "/dist/index.bundle.js",
   "/assets/js/indexedDB.js",
   "/assets/css/styles.css",
   "/assets/images/icons/icon-192x192.png",
