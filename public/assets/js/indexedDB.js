@@ -1,5 +1,5 @@
 // set up the indexedDB 'budget' database
-function getBudgetIDBConnection() {
+export function getBudgetIDBConnection() {
   return new Promise((resolve, reject) => {
     let db;
     if ("indexedDB" in window) {
@@ -34,7 +34,7 @@ function getBudgetIDBConnection() {
   });
 }
 
-function indexTransaction(transactionData) {
+export function indexTransaction(transactionData) {
   return new Promise((resolve, reject) => {
     getBudgetIDBConnection()
       .then(db => {
@@ -51,7 +51,7 @@ function indexTransaction(transactionData) {
   });
 }
 
-function getIndexedTransactions() {
+export function getIndexedTransactions() {
   return new Promise((resolve, reject) => {
     getBudgetIDBConnection()
       .then(db => {
@@ -70,7 +70,7 @@ function getIndexedTransactions() {
   });
 }
 
-function clearIndexedTransactions() {
+export function clearIndexedTransactions() {
   getBudgetIDBConnection()
     .then(db => {
       if (db) {
@@ -84,7 +84,7 @@ function clearIndexedTransactions() {
     });
 }
 
-function postIndexedTransactions() {
+export function postIndexedTransactions() {
   getIndexedTransactions()
     .then(transactions => {
       if (transactions.length > 0) {
@@ -105,5 +105,3 @@ function postIndexedTransactions() {
       console.log(err);
     });
 }
-
-window.addEventListener("online", postIndexedTransactions);

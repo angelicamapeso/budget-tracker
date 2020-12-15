@@ -1,3 +1,8 @@
+import {
+  getIndexedTransactions,
+  indexTransaction,
+  postIndexedTransactions,
+} from "./indexedDB.js";
 import { getTransactions, postTransaction } from "./api.js";
 
 let transactions = [];
@@ -7,6 +12,8 @@ window.addEventListener("load", function () {
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/service-worker.js");
   }
+
+  window.addEventListener("online", postIndexedTransactions);
 
   getTransactions().then(data => {
     // save db data on global variable
