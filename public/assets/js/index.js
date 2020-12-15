@@ -4,7 +4,7 @@ import {
   postIndexedTransactions,
 } from "./indexedDB.js";
 import { getTransactions, postTransaction } from "./api.js";
-import { populateTotal } from "./populate.js";
+import { populateTotal, populateTable } from "./populate.js";
 
 let transactions = [];
 let myChart;
@@ -29,33 +29,17 @@ window.addEventListener("load", function () {
         }
 
         populateTotal(transactions);
-        populateTable();
+        populateTable(transactions);
         populateChart();
       });
     } else {
       postIndexedTransactions();
       populateTotal(transactions);
-      populateTable();
+      populateTable(transactions);
       populateChart();
     }
   });
 });
-
-function populateTable() {
-  let tbody = document.querySelector("#tbody");
-  tbody.innerHTML = "";
-
-  transactions.forEach(transaction => {
-    // create and populate a table row
-    let tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${transaction.name}</td>
-      <td>${transaction.value}</td>
-    `;
-
-    tbody.appendChild(tr);
-  });
-}
 
 function populateChart() {
   // copy array and reverse it
@@ -127,7 +111,7 @@ function sendTransaction(isAdding) {
 
   // re-run logic to populate ui with new record
   populateChart();
-  populateTable();
+  populateTable(transactions);
   populateTotal(transactions);
 
   // also send to server
