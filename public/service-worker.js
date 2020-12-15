@@ -26,3 +26,20 @@ self.addEventListener("install", function (event) {
 
   self.skipWaiting();
 });
+
+// clear out old caches in the activate stage
+self.addEventListener("activate", function (event) {
+  const allowedCaches = [STATIC_CACHE, DATA_CACHE];
+
+  event.waitUntil(
+    caches.keys().then(function (cacheNames) {
+      return Promise.all(
+        cacheNames.map(function (cacheName) {
+          if (!allowedCaches.includes(cacheName)) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+});
