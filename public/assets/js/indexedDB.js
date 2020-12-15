@@ -7,10 +7,7 @@ function getBudgetIDBConnection() {
 
       // handles any errors when opening indexedDB database
       request.onerror = function (event) {
-        console.log(
-          "[Indexed DB] Error with open database request: ",
-          request.error
-        );
+        reject(request.error);
       };
 
       // indexedDB successfully opened
@@ -24,7 +21,7 @@ function getBudgetIDBConnection() {
       request.onupgradeneeded = function (event) {
         const db = request.result;
         db.onerror = function (event) {
-          console.log(`[Indexed DB] Error with database: ${db.name}`, db.error);
+          reject(db.error);
         };
 
         db.createObjectStore("transactions", {
@@ -32,70 +29,81 @@ function getBudgetIDBConnection() {
         });
       };
     } else {
-      console.log("IndexedDB is not supported by this browser.");
-      resolve(db);
+      reject(new Error("IndexedDB is not supported by this browser."));
     }
   });
 }
 
 function indexTransaction(transactionData) {
   return new Promise((resolve, reject) => {
-    getBudgetIDBConnection().then(db => {
-      if (db) {
-        const transaction = db.transaction(["transactions"], "readwrite");
-        const store = transaction.objectStore("transactions");
-        store.add(transactionData);
-        resolve(transactionData);
-      } else {
-        resolve(db);
-      }
-    });
+    getBudgetIDBConnection()
+      .then(db => {
+        if (db) {
+          const transaction = db.transaction(["transactions"], "readwrite");
+          const store = transaction.objectStore("transactions");
+          store.add(transactionData);
+          resolve(transactionData);
+        }
+      })
+      .catch(err => {
+        reject(err);
+      });
   });
 }
 
 function getIndexedTransactions() {
   return new Promise((resolve, reject) => {
-    getBudgetIDBConnection().then(db => {
-      if (db) {
-        const transaction = db.transaction(["transactions"], "readonly");
-        const store = transaction.objectStore("transactions");
-        const getAll = store.getAll();
-        getAll.onsuccess = function () {
-          resolve(getAll.result);
-        };
-      } else {
-        resolve(db);
-      }
-    });
+    getBudgetIDBConnection()
+      .then(db => {
+        if (db) {
+          const transaction = db.transaction(["transactions"], "readonly");
+          const store = transaction.objectStore("transactions");
+          const getAll = store.getAll();
+          getAll.onsuccess = function () {
+            resolve(getAll.result);
+          };
+        }
+      })
+      .catch(err => {
+        reject(err);
+      });
   });
 }
 
 function clearIndexedTransactions() {
-  getBudgetIDBConnection().then(db => {
-    if (db) {
-      const transaction = db.transaction(["transactions"], "readwrite");
-      const store = transaction.objectStore("transactions");
-      store.clear();
-    }
-  });
+  getBudgetIDBConnection()
+    .then(db => {
+      if (db) {
+        const transaction = db.transaction(["transactions"], "readwrite");
+        const store = transaction.objectStore("transactions");
+        store.clear();
+      }
+    })
+    .catch(err => {
+      console.log(err);
+    });
 }
 
 function postIndexedTransactions() {
-  getIndexedTransactions().then(transactions => {
-    if (transactions.length > 0) {
-      fetch("/api/transaction/bulk", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(transactions),
-      })
-        .then(response => response.json())
-        .then(() => {
-          clearIndexedTransactions();
-        });
-    }
-  });
+  getIndexedTransactions()
+    .then(transactions => {
+      if (transactions.length > 0) {
+        fetch("/api/transaction/bulk", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(transactions),
+        })
+          .then(response => response.json())
+          .then(() => {
+            clearIndexedTransactions();
+          });
+      }
+    })
+    .catch(err => {
+      console.log(err);
+    });
 }
 
 window.addEventListener("online", postIndexedTransactions);
