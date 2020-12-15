@@ -14,9 +14,14 @@ window.addEventListener("load", function () {
       // save db data on global variable
       transactions = data;
 
-      populateTotal();
-      populateTable();
-      populateChart();
+      if (!navigator.onLine) {
+        getRecords(transactions);
+        console.log(transactions);
+      } else {
+        populateTotal();
+        populateTable();
+        populateChart();
+      }
     });
 });
 

@@ -45,6 +45,23 @@ function saveRecord(transactionData) {
   store.add(transactionData);
 }
 
+function getRecords(transactionArray) {
+  const transaction = db.transaction(["transactions"], "readonly");
+  const store = transaction.objectStore("transactions");
+  const getAll = store.getAll();
+  getAll.onsuccess = function () {
+    if (getAll.result.length > 0) {
+      getAll.result.forEach(result => {
+        transactionArray.unshift(result);
+      });
+
+      populateTotal();
+      populateTable();
+      populateChart();
+    }
+  };
+}
+
 function postIndexedTransactions() {
   const transaction = db.transaction(["transactions"], "readwrite");
   const store = transaction.objectStore("transactions");
