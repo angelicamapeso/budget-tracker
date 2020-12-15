@@ -1,3 +1,5 @@
+import { postBulkTransactions } from "./api.js";
+
 // set up the indexedDB 'budget' database
 export function getBudgetIDBConnection() {
   return new Promise((resolve, reject) => {
@@ -88,17 +90,9 @@ export function postIndexedTransactions() {
   getIndexedTransactions()
     .then(transactions => {
       if (transactions.length > 0) {
-        fetch("/api/transaction/bulk", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(transactions),
-        })
-          .then(response => response.json())
-          .then(() => {
-            clearIndexedTransactions();
-          });
+        postBulkTransactions(transactions).then(() => {
+          clearIndexedTransactions();
+        });
       }
     })
     .catch(err => {

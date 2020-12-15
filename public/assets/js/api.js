@@ -16,3 +16,13 @@ export function postTransaction(transaction) {
     return response.json();
   });
 }
+
+export function postBulkTransactions(transactions) {
+  return fetch("/api/transaction/bulk", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(transactions),
+  }).then(response => response.json());
+}
