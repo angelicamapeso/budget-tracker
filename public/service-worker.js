@@ -3,10 +3,14 @@ const DATA_CACHE = "data-cache-v1";
 const FILES_TO_CACHE = [
   "/",
   "/dist/index.bundle.js",
-  // "/assets/js/indexedDB.js",
   "/assets/css/styles.css",
-  "/assets/images/icons/icon-192x192.png",
-  "/assets/images/icons/icon-512x512.png",
+  "/dist/auto/icon_96x96.png",
+  "/dist/auto/icon_128x128.png",
+  "/dist/auto/icon_192x192.png",
+  "/dist/auto/icon_256x256.png",
+  "/dist/auto/icon_384x384.png",
+  "/dist/auto/icon_512x512.png",
+  "/dist/manifest.json",
 ];
 
 // install service worker:
