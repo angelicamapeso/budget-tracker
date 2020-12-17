@@ -17,7 +17,7 @@ For avid travellers who need to keep their account balance accurate while travel
 ## Local Installation
 
 1. Run `npm install` before using the application locally.
-2. After making any changes to the [`public/assets/js`](./public/assets/js) or any files affected by the `entry` file(s) in the [`webpack.config.js`](webpack.config.js), run `npm run build` before starting the server.
+2. After making any changes to [`public/assets/js`](./public/assets/js) or any files affected by the `entry` file(s) in [`webpack.config.js`](webpack.config.js), run `npm run build` before starting the server.
 
 ## Built with
 
