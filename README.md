@@ -1,4 +1,4 @@
-# Bootcamp - Homework 13: Budget Tracker
+# Budget Tracker
 
 ![Budget tracker preview](./img/budget-tracker-desktop.png)
 
@@ -38,5 +38,3 @@ For avid travellers who need to keep their account balance accurate while travel
 ## License
 
 This project is licensed under the **MIT License**.
-
-This homework assignment is part of the [Carleton University Coding Bootcamp](https://bootcamp.carleton.ca/).
